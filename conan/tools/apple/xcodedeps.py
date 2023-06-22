@@ -34,14 +34,14 @@ def _xcconfig_settings_filename(settings):
     return _format_name(name)
 
 
-def _xcconfig_conditional(settings):
+def _xcconfig_conditional(settings, configuration):
     sdk_condition = "*"
     arch = settings.get_safe("arch")
     architecture = to_apple_arch(arch) or arch
     if settings.get_safe("os.sdk"):
         sdk_condition = "{}{}".format(settings.get_safe("os.sdk"), settings.get_safe("os.sdk_version") or "*")
 
-    return "[config={}][arch={}][sdk={}]".format(settings.get_safe("build_type"), architecture, sdk_condition)
+    return "[config={}][arch={}][sdk={}]".format(configuration, architecture, sdk_condition)
 
 
 def _add_includes_to_file_or_create(filename, template, files_to_include):
@@ -146,7 +146,7 @@ class XcodeDeps(object):
             'cxx_compiler_flags': " ".join('"{}"'.format(p.replace('"', '\\"')) for p in _merged_vars("cxxflags")),
             'linker_flags': " ".join('"{}"'.format(p.replace('"', '\\"')) for p in _merged_vars("sharedlinkflags")),
             'exe_flags': " ".join('"{}"'.format(p.replace('"', '\\"')) for p in _merged_vars("exelinkflags")),
-            'condition': _xcconfig_conditional(self._conanfile.settings)
+            'condition': _xcconfig_conditional(self._conanfile.settings, self.configuration)
         }
 
         template = Template(self._conf_xconfig)
